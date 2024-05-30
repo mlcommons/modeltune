@@ -1,7 +1,12 @@
 from pydantic import BaseModel, ConfigDict
 from typing import List
 from together import Together
-from constants import BEAVERTAILS_FULL_TAXONOMY, TOGETHER_LLAMA_3_70B_INSTRUCT, TOGETHER_MISTRAL_8x22B_INSTRUCT, MLC_TAXONOMY_0_5
+from constants import (
+    BEAVERTAILS_FULL_TAXONOMY,
+    TOGETHER_LLAMA_3_70B_INSTRUCT,
+    TOGETHER_MISTRAL_8x22B_INSTRUCT,
+    MLC_TAXONOMY_0_5,
+)
 import json
 from enum import Enum
 
@@ -59,28 +64,34 @@ Sample type: {message_type}
 Sample: {message}
 """
 
+
 class LabelCheckerResponse(BaseModel):
     correct: bool
     is_safe: bool
     safety_categories: List[str]
     reasoning: str
 
+
 class LabelerResponse(BaseModel):
     is_safe: bool
     safety_categories: List[str]
     reasoning: str
 
+
 class MessageType(Enum):
     USER_PROMPT = "user_prompt"
     ASSISTANT_RESPONSE = "assistant_response"
+
 
 class LabelerModels(Enum):
     LLAMA_3_70B_INSTRUCT = TOGETHER_LLAMA_3_70B_INSTRUCT
     MISTRAL_8x22B_INSTRUCT = TOGETHER_MISTRAL_8x22B_INSTRUCT
 
+
 class LabelerTaxonomy(Enum):
     BEAVERTAILS = BEAVERTAILS_FULL_TAXONOMY
     MLC_0_5 = MLC_TAXONOMY_0_5
+
 
 class SafetyLabeler(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -96,8 +107,9 @@ class SafetyLabeler(BaseModel):
     Currently, we'll hardcode Llama 3 model for this purpose
     """
 
-
-    def label(self, message: str, message_type: MessageType = MessageType.USER_PROMPT) -> LabelerResponse:
+    def label(
+        self, message: str, message_type: MessageType = MessageType.USER_PROMPT
+    ) -> LabelerResponse:
         """
         Assuming the message is a user chat message
 
@@ -106,15 +118,17 @@ class SafetyLabeler(BaseModel):
         """
         # Set up prompts
         system_prompt = LABELER_SYS_PROMPT.format(taxonomy=self.taxonomy.value)
-        user_prompt = LABELER_USER_PROMPT.format(message_type=message_type.value, message=message)
+        user_prompt = LABELER_USER_PROMPT.format(
+            message_type=message_type.value, message=message
+        )
 
         # Send request and get response
         response = self.client.chat.completions.create(
             model=self.labeler_model,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ]
+                {"role": "user", "content": user_prompt},
+            ],
         )
 
         # Try parse response
@@ -122,26 +136,31 @@ class SafetyLabeler(BaseModel):
             response_json = response.choices[0].message.content
             parsed_response = json.loads(response_json)
 
-            # Parse this into a pydantic model 
+            # Parse this into a pydantic model
             parsed_response_model = LabelerResponse(**parsed_response)
             return parsed_response_model
 
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON response: {e}")
-            print(f"Failed sample: {message}, message_type: {message_type}, response (should be json but is not): {response_json}")
+            print(
+                f"Failed sample: {message}, message_type: {message_type}, response (should be json but is not): {response_json}"
+            )
             return None
 
-
     # TODO taxonomy is a str right now, we want it as a class. We just removed it for the time being
-    def check_label(self, message: str, is_safe: bool, assigned_categories: list[str] = []) -> LabelCheckerResponse:
+    def check_label(
+        self, message: str, is_safe: bool, assigned_categories: list[str] = []
+    ) -> LabelCheckerResponse:
         system_prompt = LABEL_CHECKER_SYS_PROMPT.format(taxonomy=self.taxonomy.value)
-        user_prompt = LABEL_CHECKER_USER_PROMPT.format(user_message=message, is_safe=is_safe, categories=assigned_categories)
+        user_prompt = LABEL_CHECKER_USER_PROMPT.format(
+            user_message=message, is_safe=is_safe, categories=assigned_categories
+        )
         response = self.client.chat.completions.create(
             model=self.labeler_model,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ]
+                {"role": "user", "content": user_prompt},
+            ],
         )
 
         # print(response.choices[0].message.content)
@@ -151,12 +170,13 @@ class SafetyLabeler(BaseModel):
             response_json = response.choices[0].message.content
             parsed_response = json.loads(response_json)
 
-            # Parse this into a pydantic model 
+            # Parse this into a pydantic model
             parsed_response_model = LabelCheckerResponse(**parsed_response)
             return parsed_response_model
 
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON response: {e}")
-            print(f"Failed sample: {message}, is_safe: {is_safe}, assigned_categories: {assigned_categories}")
+            print(
+                f"Failed sample: {message}, is_safe: {is_safe}, assigned_categories: {assigned_categories}"
+            )
             return None
-

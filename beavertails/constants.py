@@ -133,7 +133,7 @@ BEAVER_EASY_CATEGORIES = [
     "non_violent_unethical_behavior",
     "self_harm",
     "terrorism,organized_crime",
-    "violence,aiding_and_abetting,incitement"
+    "violence,aiding_and_abetting,incitement",
 ]
 
 BEAVER_AMBIGUOUS_CATEGORIES = [
@@ -142,7 +142,7 @@ BEAVER_AMBIGUOUS_CATEGORIES = [
     "drug_abuse,weapons,banned_substance",
     "financial_crime,property_crime,theft",
     "privacy_violation",
-    "sexually_explicit,adult_content"
+    "sexually_explicit,adult_content",
 ]
 
 BEAVERTAILS_FULL_TAXONOMY = """

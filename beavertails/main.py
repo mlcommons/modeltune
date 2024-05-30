@@ -4,12 +4,25 @@ import json
 import os
 from together import Together
 from dotenv import load_dotenv
-from llama_recipes.inference.prompt_format_utils import build_custom_prompt, create_conversation, LlamaGuardVersion, AgentType, SafetyCategory, LLAMA_GUARD_2_CATEGORY_SHORT_NAME_PREFIX, PROMPT_TEMPLATE_2
+from llama_recipes.inference.prompt_format_utils import (
+    build_custom_prompt,
+    create_conversation,
+    LlamaGuardVersion,
+    AgentType,
+    SafetyCategory,
+    LLAMA_GUARD_2_CATEGORY_SHORT_NAME_PREFIX,
+    PROMPT_TEMPLATE_2,
+)
 
 from taxonomy import TaxonomyCategory, MLCTaxonomyCategories
 from constants import BEAVER_AMBIGUOUS_CATEGORIES, BEAVER_EASY_CATEGORIES
 from llama_guard_utils import build_llama_guard_2_prompt, lg_parse
-from safety_labeler import SafetyLabeler, LabelerResponse, LabelerModels, LabelerTaxonomy
+from safety_labeler import (
+    SafetyLabeler,
+    LabelerResponse,
+    LabelerModels,
+    LabelerTaxonomy,
+)
 import datetime
 import argparse
 
@@ -23,17 +36,35 @@ def _map_beaver_to_llama_categories(beaver_categories: list[str]):
     result: set[TaxonomyCategory] = set()
     for category in beaver_categories:
         if category == "animal_abuse":
-            result.update([mlc_taxonomy.violent_crimes, mlc_taxonomy.non_violent_crimes, mlc_taxonomy.unknown_hazard])
+            result.update(
+                [
+                    mlc_taxonomy.violent_crimes,
+                    mlc_taxonomy.non_violent_crimes,
+                    mlc_taxonomy.unknown_hazard,
+                ]
+            )
         elif category == "child_abuse":
             result.update([mlc_taxonomy.child_sexual_exploitation])
-        elif category == "controversial_topics,politics": 
+        elif category == "controversial_topics,politics":
             result.update([mlc_taxonomy.hate, mlc_taxonomy.unknown_hazard])
         elif category == "discrimination,stereotype,injustice":
             result.update([mlc_taxonomy.hate])
         elif category == "drug_abuse,weapons,banned_substance":
-            result.update([mlc_taxonomy.violent_crimes, mlc_taxonomy.indiscriminate_weapons_cbrne, mlc_taxonomy.unknown_hazard])
+            result.update(
+                [
+                    mlc_taxonomy.violent_crimes,
+                    mlc_taxonomy.indiscriminate_weapons_cbrne,
+                    mlc_taxonomy.unknown_hazard,
+                ]
+            )
         elif category == "financial_crime,property_crime,theft":
-            result.update([mlc_taxonomy.violent_crimes, mlc_taxonomy.non_violent_crimes, mlc_taxonomy.unknown_hazard])
+            result.update(
+                [
+                    mlc_taxonomy.violent_crimes,
+                    mlc_taxonomy.non_violent_crimes,
+                    mlc_taxonomy.unknown_hazard,
+                ]
+            )
         elif category == "hate_speech,offensive_language":
             result.update([mlc_taxonomy.hate])
         elif category == "misinformation_regarding_ethics,laws_and_safety":
@@ -41,30 +72,51 @@ def _map_beaver_to_llama_categories(beaver_categories: list[str]):
         elif category == "non_violent_unethical_behavior":
             result.update([mlc_taxonomy.non_violent_crimes])
         elif category == "privacy_violation":
-            result.update([mlc_taxonomy.intellectual_property, mlc_taxonomy.non_violent_crimes, mlc_taxonomy.unknown_hazard])
+            result.update(
+                [
+                    mlc_taxonomy.intellectual_property,
+                    mlc_taxonomy.non_violent_crimes,
+                    mlc_taxonomy.unknown_hazard,
+                ]
+            )
         elif category == "self_harm":
             result.update([mlc_taxonomy.suicide_and_self_harm])
         elif category == "sexually_explicit,adult_content":
-            result.update([mlc_taxonomy.sex_related_crimes, mlc_taxonomy.child_sexual_exploitation, mlc_taxonomy.unknown_hazard])
+            result.update(
+                [
+                    mlc_taxonomy.sex_related_crimes,
+                    mlc_taxonomy.child_sexual_exploitation,
+                    mlc_taxonomy.unknown_hazard,
+                ]
+            )
         elif category == "terrorism,organized_crime":
             result.update([mlc_taxonomy.violent_crimes])
         elif category == "violence,aiding_and_abetting,incitement":
             result.update([mlc_taxonomy.violent_crimes])
-    
+
     result = list(map((lambda x: x.to_llama_safety_category()), result))
     return result
+
 
 def build_beaver_to_llama_prompt(user_prompt: str, beaver_categories: list[str]):
     possible_safety_categories = _map_beaver_to_llama_categories(beaver_categories)
     return build_llama_guard_2_prompt(user_prompt, possible_safety_categories)
 
+
 def add_pretty_columns(sample, mlc_categories: str):
     original_categories = sample["category"]
-    original_detected_categories = {k: v for k, v in original_categories.items() if v is True}
-    sample["original_detected_categories"] = ",".join(original_detected_categories.keys())
-    mlc_detected_categories = {k: v for k, v in mlc_categories.model_dump().items() if v is True}
+    original_detected_categories = {
+        k: v for k, v in original_categories.items() if v is True
+    }
+    sample["original_detected_categories"] = ",".join(
+        original_detected_categories.keys()
+    )
+    mlc_detected_categories = {
+        k: v for k, v in mlc_categories.model_dump().items() if v is True
+    }
     sample["mlc_detected_categories"] = ";".join(mlc_detected_categories.keys())
     return sample
+
 
 def map_beaver_to_mlc(sample):
     category_dict = sample["category"]
@@ -98,7 +150,9 @@ def map_beaver_to_mlc(sample):
     else:
         # Ask LG2 to do the categorization.
         user_prompt = sample["prompt"]
-        test_lg_prompt = build_beaver_to_llama_prompt(user_prompt, detected_categories.keys())
+        test_lg_prompt = build_beaver_to_llama_prompt(
+            user_prompt, detected_categories.keys()
+        )
 
         test_response = client.completions.create(
             model="meta-llama/LlamaGuard-2-8b",
@@ -107,13 +161,17 @@ def map_beaver_to_mlc(sample):
 
         lg_categorization = test_response.choices[0].text
 
-        possible_safety_categories = _map_beaver_to_llama_categories(detected_categories.keys())
+        possible_safety_categories = _map_beaver_to_llama_categories(
+            detected_categories.keys()
+        )
         parsed_categories = lg_parse(
             output=lg_categorization,
             categories=[category.name for category in possible_safety_categories],
-            category_prefix=LLAMA_GUARD_2_CATEGORY_SHORT_NAME_PREFIX
+            category_prefix=LLAMA_GUARD_2_CATEGORY_SHORT_NAME_PREFIX,
         )
-        print(f"Original phrase: {user_prompt}\nOriginal categories: {detected_categories.keys()}\nLlama Guard response: {lg_categorization}\nParsed categories: {parsed_categories}\n")
+        print(
+            f"Original phrase: {user_prompt}\nOriginal categories: {detected_categories.keys()}\nLlama Guard response: {lg_categorization}\nParsed categories: {parsed_categories}\n"
+        )
 
         mlc_tax_categories = MLCTaxonomyCategories.from_category_list(parsed_categories)
 
@@ -126,11 +184,13 @@ def map_beaver_to_mlc(sample):
 
     # Add easy readable columns
     sample = add_pretty_columns(sample, mlc_tax_categories)
-    
-    return sample 
+
+    return sample
+
 
 global_correct = 0
 global_incorrect = 0
+
 
 def validate_beaver_safety_labels(sample):
     global global_correct, global_incorrect
@@ -141,7 +201,9 @@ def validate_beaver_safety_labels(sample):
     category_dict = sample["category"]
     detected_categories = {k: v for k, v in category_dict.items() if v is True}
 
-    response = label_checker.check_label(user_message, is_safe, detected_categories.keys())
+    response = label_checker.check_label(
+        user_message, is_safe, detected_categories.keys()
+    )
 
     if response.correct:
         print("Categorization is correct.")
@@ -152,15 +214,16 @@ def validate_beaver_safety_labels(sample):
         global_incorrect += 1
 
     sample["label_is_correct"] = response.correct
-    sample["label_validation_dict"] = response.model_dump_json(indent = 2)
+    sample["label_validation_dict"] = response.model_dump_json(indent=2)
 
     return sample
+
 
 def label_beaver(sample, idx, labeler: SafetyLabeler):
     # TODO create a beaver dataset parser for this to avoid repeating code
     user_message = sample["prompt"]
 
-    response: LabelerResponse = labeler.label(message = user_message)
+    response: LabelerResponse = labeler.label(message=user_message)
 
     if response is None:
         # TODO log which lines failed so we can rerun. E.g. add the index of the sample to the function
@@ -176,7 +239,6 @@ def label_beaver(sample, idx, labeler: SafetyLabeler):
         sample["label_succeeded"] = True
 
     return sample
-
 
 
 def main():
@@ -207,9 +269,15 @@ def main():
     # label_checker.check_label("This is a test message", False, ["violence"])
 
     print("Starting map operation...")
-    labeler = SafetyLabeler(client=client, labeler_model=LabelerModels.LLAMA_3_70B_INSTRUCT, taxonomy=LabelerTaxonomy.MLC_0_5)
+    labeler = SafetyLabeler(
+        client=client,
+        labeler_model=LabelerModels.LLAMA_3_70B_INSTRUCT,
+        taxonomy=LabelerTaxonomy.MLC_0_5,
+    )
     # result = working_dataset.map(lambda sample: label_beaver(sample, labeler))
-    result = working_dataset.map(label_beaver, fn_kwargs={"labeler": labeler}, with_indices=True)
+    result = working_dataset.map(
+        label_beaver, fn_kwargs={"labeler": labeler}, with_indices=True
+    )
 
     # updated_dataset = working_dataset.map(map_beaver_to_mlc)
 
@@ -220,7 +288,10 @@ def main():
     current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     model_used = labeler.labeler_model.name
     dataset_size = f"{len(working_dataset)}_rows"
-    result.to_csv(f"/Users/ryan/projects/mlc/modeltune/beavertails/outputs/{model_used}_{dataset_size}_{current_datetime}.csv")
+    result.to_csv(
+        f"/Users/ryan/projects/mlc/modeltune/beavertails/outputs/{model_used}_{dataset_size}_{current_datetime}.csv"
+    )
+
 
 if __name__ == "__main__":
     main()
