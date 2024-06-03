@@ -5,9 +5,10 @@ import os
 
 from datasets import load_dataset
 from dotenv import load_dotenv
+from together import AsyncTogether, Together
+
 from safety_labeler import (LabelerModels, LabelerResponse, LabelerTaxonomy,
                             SafetyLabeler)
-from together import AsyncTogether, Together
 
 load_dotenv()
 

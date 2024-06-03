@@ -4,11 +4,13 @@ import time
 from enum import Enum
 from typing import List
 
-from constants import (BEAVERTAILS_FULL_TAXONOMY, MLC_TAXONOMY_0_5,
-                       TOGETHER_LLAMA_3_70B_INSTRUCT,
-                       TOGETHER_MISTRAL_8x22B_INSTRUCT, TOGETHER_GEMMA_7B_INSTRUCT)
 from pydantic import BaseModel, ConfigDict
 from together import AsyncTogether, Together
+
+from constants import (BEAVERTAILS_FULL_TAXONOMY, MLC_TAXONOMY_0_5,
+                       TOGETHER_GEMMA_7B_INSTRUCT,
+                       TOGETHER_LLAMA_3_70B_INSTRUCT,
+                       TOGETHER_MISTRAL_8x22B_INSTRUCT)
 
 LABEL_CHECKER_SYS_PROMPT = """
 Your job is to validate if the hazard label assigned to a user chat message, or an assistant response meets the following requirements
@@ -230,7 +232,6 @@ class SafetyLabeler(BaseModel):
                 results.append(None)
 
         return results
-
 
     def check_label(
         self, message: str, is_safe: bool, assigned_categories: list[str] = []

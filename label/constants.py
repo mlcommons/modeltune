@@ -26,7 +26,7 @@ MLC_TAXONOMY_0_5_ALIASES = [
     "indiscriminate_weapons_cbrne",
     "suicide_and_self_harm",
     "hate",
-    "ambiguous_hazard"
+    "ambiguous_hazard",
 ]
 
 MLC_TAXONOMY_0_5 = """
