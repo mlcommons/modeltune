@@ -103,7 +103,7 @@ def main():
     # working_dataset = dataset.filter(lambda example, idx: idx % 100 == 0 and idx < 10000, with_indices=True)
 
     # Test dataset on the first 10 examples
-    working_dataset = dataset.select(range(10))
+    working_dataset = dataset.select(range(11))
 
     print(f"Length sample dataset: ", len(working_dataset))
 
