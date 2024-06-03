@@ -63,10 +63,7 @@ class SafetyLabeler(BaseModel):
         self, message: str, message_type: MessageType = MessageType.USER_PROMPT
     ) -> LabelerResponse:
         """
-        Assuming the message is a user chat message
-
-        TODO use MLC taxonomy
-        TODO support assessing assistant response
+        Synchronous method: Assuming the message is a user chat message. TODO support assessing assistant response
         """
         # Set up prompts
         system_prompt = LABELER_SYS_PROMPT.format(taxonomy=self.taxonomy.value)
@@ -119,10 +116,7 @@ class SafetyLabeler(BaseModel):
         self, messages: List[str], message_type: MessageType = MessageType.USER_PROMPT
     ) -> List[LabelerResponse]:
         """
-        Assuming the message is a user chat message
-
-        TODO use MLC taxonomy
-        TODO support assessing assistant response
+        Async method: Assuming the message is a user chat message. TODO support assessing assistant response
         """
         # Set up prompts
         system_prompt = LABELER_SYS_PROMPT.format(taxonomy=self.taxonomy.value)
@@ -151,23 +145,18 @@ class SafetyLabeler(BaseModel):
                 break
             except Exception as e:
                 print(f"Error in async_label: {e}")
-                # Allow full reset
-                # TODO need better backoff strategy
+                # TODO need better backoff strategy. Currently just give 30 seconds to allow full recovery
                 time.sleep(30)
-
-                # Try again unless it's the last retry. In which case throw fatal error
                 if retry_counter == max_retries:
                     print("Fatal error: Maximum retries exceeded")
                     raise Exception("Maximum retries exceeded")
 
         results = []
         for index, response in enumerate(responses):
-            # Try parse response
             try:
                 response_json = response.choices[0].message.content
                 parsed_response = json.loads(response_json)
 
-                # Parse this into a pydantic model
                 parsed_response_model = LabelerResponse(**parsed_response)
                 results.append(parsed_response_model)
 
@@ -176,7 +165,6 @@ class SafetyLabeler(BaseModel):
                 print(
                     f"Failed sample: {messages[index]}, message_type: {message_type}, response (should be json but is not): {response_json}"
                 )
-                # TODO probably have to append something here
                 results.append(None)
 
         return results
@@ -184,6 +172,11 @@ class SafetyLabeler(BaseModel):
     def check_label(
         self, message: str, is_safe: bool, assigned_categories: list[str] = []
     ) -> LabelCheckerResponse:
+        """
+        NOT CURRENTLY BEING USED. This method is used to check the correctness
+        of a labeled dataset in case there are licensing issues using the
+        teacher model to label directly
+        """
         system_prompt = LABEL_CHECKER_SYS_PROMPT.format(taxonomy=self.taxonomy.value)
         user_prompt = LABEL_CHECKER_USER_PROMPT.format(
             user_message=message, is_safe=is_safe, categories=assigned_categories
@@ -196,9 +189,6 @@ class SafetyLabeler(BaseModel):
             ],
         )
 
-        # print(response.choices[0].message.content)
-
-        # try to parse the json response and return it
         try:
             response_json = response.choices[0].message.content
             parsed_response = json.loads(response_json)

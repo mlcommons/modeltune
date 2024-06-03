@@ -71,11 +71,10 @@ def label_beaver(sample, labeler: SafetyLabeler):
 
 
 def main():
+    # TODO parse args into a config object and do something with it. For now just code dataset, model, taxonomy manually below
     parser = argparse.ArgumentParser(
-        description="Remap hazard datasets to different taxonomies."
+        description="Remap hazard datasets to MLC taxonomy ."
     )
-    # # TODO allow for multiple datasets. For now it's hardcorded to Beavertails
-    # parser.add_argument("--dataset", required=False, type=str, help="Name of the HuggingFace dataset to process")
     parser.add_argument(
         "--model",
         required=True,
@@ -83,9 +82,7 @@ def main():
         help="Name of the model to use for labeling",
         choices=[model.name for model in LabelerModels],
     )
-    # parser.add_argument("--taxonomy", required=True, type=str, help="The target taxonomy to use for labeling", choices=list(taxonomy.name for taxonomy in LabelerTaxonomy))
     args = parser.parse_args()
-    # # TODO parse args into a config object and do something with it. For now just code dataset, model, taxonomy manually below
 
     # Load the dataset from hugging face
     try:
@@ -94,26 +91,21 @@ def main():
         print(f"Failed to load dataset: {e}")
         return
 
-    # Select the working dataset
-
+    # Select how much of the dataset you want to process
     # Run full dataset
-    # working_dataset = dataset
+    working_dataset = dataset
 
     # Test on every X samples
     # working_dataset = dataset.filter(lambda example, idx: idx % 100 == 0 and idx < 10000, with_indices=True)
 
     # Test dataset on the first 10 examples
-    working_dataset = dataset.select(range(11))
+    # working_dataset = dataset.select(range(11))
 
     print(f"Length sample dataset: ", len(working_dataset))
 
     # Set up the Safety Labeler
-
-    # Get the selected labeler model from the argparse parameter
     selected_model = LabelerModels[args.model].value
     print(f"Selected model for safety labler: {selected_model}")
-
-    # Set up the Safety Labeler with the selected model
     labeler = SafetyLabeler(
         client=client,
         async_client=async_client,
@@ -121,7 +113,9 @@ def main():
         taxonomy=LabelerTaxonomy.MLC_0_5,
     )
 
+    # Label the dataset
     print("Starting map operation...")
+
     # Synchronous, 1 at a time. Good for testing
     # result = working_dataset.map(lambda sample: label_beaver(sample, labeler))
 
