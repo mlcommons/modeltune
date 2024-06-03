@@ -19,6 +19,7 @@ async_client = AsyncTogether(
 
 
 def batch_label_beaver(samples, labeler: SafetyLabeler):
+    """Batch labeler for the BeaverTails dataset. This is used to label the dataset in batches."""
     user_messages = samples["prompt"]
 
     loop = asyncio.get_event_loop()
@@ -48,6 +49,7 @@ def batch_label_beaver(samples, labeler: SafetyLabeler):
 
 
 def label_beaver(sample, labeler: SafetyLabeler):
+    """Labeler for the BeaverTails dataset. This is used to label the dataset one at a time."""
     user_message = sample["prompt"]
 
     response: LabelerResponse = labeler.label(message=user_message)
@@ -89,9 +91,8 @@ def main():
         return
 
     # Select how much of the dataset you want to process
-    working_dataset = dataset
-    # Test dataset on the first 10 examples
     # working_dataset = dataset.select(range(11))
+    working_dataset = dataset
     print(f"Length sample dataset: ", len(working_dataset))
 
     # Set up the Safety Labeler

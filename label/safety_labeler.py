@@ -16,6 +16,8 @@ from prompts import (LABEL_CHECKER_SYS_PROMPT, LABEL_CHECKER_USER_PROMPT,
 
 
 class LabelCheckerResponse(BaseModel):
+    """NOT CURRENTLY BEING USED. Response object when teacher model checks label correctness"""
+
     correct: bool
     is_safe: bool
     safety_categories: List[str]
@@ -23,41 +25,49 @@ class LabelCheckerResponse(BaseModel):
 
 
 class LabelerResponse(BaseModel):
+    """Response object when teacher model labels safety hazards"""
+
     is_safe: bool
     safety_categories: List[str]
     reasoning: str
 
 
 class MessageType(Enum):
+    """Enum for message types to be used in prompts. Can be either user chat message or assistant response. Will eventually support multi-turn conversation"""
+
     USER_PROMPT = "user_prompt"
     ASSISTANT_RESPONSE = "assistant_response"
 
 
 class LabelerModels(Enum):
+    """Enum for teacher models to be used for labeling safety hazards"""
+
     LLAMA_3_70B_INSTRUCT = TOGETHER_LLAMA_3_70B_INSTRUCT
     MISTRAL_8x22B_INSTRUCT = TOGETHER_MISTRAL_8x22B_INSTRUCT
     GEMMA_7B_INSTRUCT = TOGETHER_GEMMA_7B_INSTRUCT
 
 
 class LabelerTaxonomy(Enum):
+    """Enum for taxonomies to be used for labeling safety hazards"""
+
     BEAVERTAILS = BEAVERTAILS_FULL_TAXONOMY
     MLC_0_5 = MLC_TAXONOMY_0_5
 
 
 class SafetyLabeler(BaseModel):
+    """
+    This class can
+    1. Label safety hazards according to a taxonomy using powerful teacher model
+    2. Check correctness of hazard labeled datasets (NOT CURRENTLY BEING USED). To be used in case of licensing issues generating direct labels
+
+    Currently, we'll hardcode Llama 3 model for this purpose
+    """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
     client: Together
     async_client: AsyncTogether
     labeler_model: LabelerModels
     taxonomy: LabelerTaxonomy
-
-    """
-    This class can
-    1. Label safety hazards according to a taxonomy using powerful teacher model
-    2. Check correctness of hazard labeled datasets by using more powerful teacher models
-    
-    Currently, we'll hardcode Llama 3 model for this purpose
-    """
 
     def label(
         self, message: str, message_type: MessageType = MessageType.USER_PROMPT
