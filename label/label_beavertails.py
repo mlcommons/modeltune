@@ -19,13 +19,12 @@ async_client = AsyncTogether(
 
 
 def batch_label_beaver(samples, labeler: SafetyLabeler):
-    # TODO create a beaver dataset parser for this to avoid repeating code
     user_messages = samples["prompt"]
 
     loop = asyncio.get_event_loop()
     responses = loop.run_until_complete(labeler.async_label(messages=user_messages))
 
-    # Create dict keys to store extra columns
+    # Create extra columns
     samples["labeled_is_safe"] = [None] * len(user_messages)
     samples["labeled_safety_categories"] = [None] * len(user_messages)
     samples["label_reasoning"] = [None] * len(user_messages)
@@ -49,7 +48,6 @@ def batch_label_beaver(samples, labeler: SafetyLabeler):
 
 
 def label_beaver(sample, labeler: SafetyLabeler):
-    # TODO create a beaver dataset parser for this to avoid repeating code
     user_message = sample["prompt"]
 
     response: LabelerResponse = labeler.label(message=user_message)
@@ -71,7 +69,6 @@ def label_beaver(sample, labeler: SafetyLabeler):
 
 
 def main():
-    # TODO parse args into a config object and do something with it. For now just code dataset, model, taxonomy manually below
     parser = argparse.ArgumentParser(
         description="Remap hazard datasets to MLC taxonomy ."
     )
@@ -92,15 +89,9 @@ def main():
         return
 
     # Select how much of the dataset you want to process
-    # Run full dataset
     working_dataset = dataset
-
-    # Test on every X samples
-    # working_dataset = dataset.filter(lambda example, idx: idx % 100 == 0 and idx < 10000, with_indices=True)
-
     # Test dataset on the first 10 examples
     # working_dataset = dataset.select(range(11))
-
     print(f"Length sample dataset: ", len(working_dataset))
 
     # Set up the Safety Labeler
@@ -115,19 +106,12 @@ def main():
 
     # Label the dataset
     print("Starting map operation...")
-
-    # Synchronous, 1 at a time. Good for testing
-    # result = working_dataset.map(lambda sample: label_beaver(sample, labeler))
-
-    # Process threaded version. Had trouble getting this to work sometimes
-    # result = working_dataset.map(
-    #     label_beaver, fn_kwargs={"labeler": labeler}, num_proc=12
-    # )
-
     # Async, batched map operation. This works well for large datasets
     result = working_dataset.map(
         batch_label_beaver, fn_kwargs={"labeler": labeler}, batched=True, batch_size=20
     )
+    # Synchronous, 1 at a time. Good for testing
+    # result = working_dataset.map(lambda sample: label_beaver(sample, labeler))
 
     # Save the updated dataset
     current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
