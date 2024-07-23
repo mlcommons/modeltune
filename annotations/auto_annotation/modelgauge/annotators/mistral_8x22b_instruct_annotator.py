@@ -2,7 +2,7 @@ import os
 
 from modelgauge.annotator_registry import ANNOTATORS
 from modelgauge.annotators.prompt_engineered_annotator import (
-    PromptEngineeredAnnotatorConfig, PromptEngineeredTogetherAnnotator,
+    PromptEngineeredAnnotatorConfig, PromptEngineeredAnnotator,
     TogetherModelConfig)
 from modelgauge.safety_model_constants import ASSISTANT_ROLE
 from modelgauge.safety_model_prompts import (LABELER_SYS_PROMPT,
@@ -23,5 +23,5 @@ MISTRAL_8x22B_CONFIG = PromptEngineeredAnnotatorConfig(
 )
 
 ANNOTATORS.register(
-    PromptEngineeredTogetherAnnotator, MISTRAL_8x22B_CONFIG.name, MISTRAL_8x22B_CONFIG
+    PromptEngineeredAnnotator, MISTRAL_8x22B_CONFIG.name, MISTRAL_8x22B_CONFIG
 )

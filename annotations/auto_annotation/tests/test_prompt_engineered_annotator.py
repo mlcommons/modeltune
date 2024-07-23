@@ -1,7 +1,7 @@
 import json
 
 from modelgauge.annotators.prompt_engineered_annotator import (
-    PromptEngineeredAnnotatorConfig, PromptEngineeredTogetherAnnotator,
+    PromptEngineeredAnnotatorConfig, PromptEngineeredAnnotator,
     TogetherModelConfig)
 from modelgauge.prompt import ChatMessage, ChatPrompt, ChatRole, TextPrompt
 from modelgauge.safety_model_constants import (ASSISTANT_ROLE, SYSTEM_ROLE,
@@ -27,7 +27,7 @@ def _fake_annotator(role_to_measure=ASSISTANT_ROLE):
         role_to_measure=role_to_measure,
     )
 
-    fake_annotator = PromptEngineeredTogetherAnnotator("_", fake_config)
+    fake_annotator = PromptEngineeredAnnotator("_", fake_config)
 
     return fake_annotator
 

@@ -14,7 +14,6 @@ from modelgauge.suts.together_client import (TogetherApiKey,
                                              TogetherChatResponse,
                                              TogetherChatSUT)
 
-
 class TogetherModelConfig(BaseModel):
     path: str
     max_tokens: int = 4000
@@ -32,7 +31,7 @@ class PromptEngineeredAnnotatorConfig(BaseModel):
     pass
 
 
-class PromptEngineeredTogetherAnnotator(CompletionAnnotator[SafetyModelResponse]):
+class PromptEngineeredAnnotator(CompletionAnnotator[SafetyModelResponse]):
     """Annotator using prompt engineering for hazard and safety classification"""
 
     def __init__(
