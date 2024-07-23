@@ -1,5 +1,6 @@
 from modelgauge.prompt import ChatPrompt, ChatRole
 
+
 def flatten_conversation_to_str(
     chat: ChatPrompt, *, user_role: str = "User", sut_role: str = "Assistant"
 ) -> str:

@@ -1,10 +1,6 @@
 import json
-from typing import List
-from modelgauge.safety_model_prompts import (
-    LABELER_SYS_PROMPT,
-    LABELER_USER_PROMPT,
-    MLC_TAXONOMY_0_5,
-)
+
+from pydantic import BaseModel
 from modelgauge.suts.together_client import (
     TogetherApiKey,
     TogetherChatRequest,
@@ -12,37 +8,50 @@ from modelgauge.suts.together_client import (
     TogetherChatSUT,
 )
 from modelgauge.annotator import CompletionAnnotator
-from modelgauge.annotator_registry import ANNOTATORS
 from modelgauge.prompt import ChatMessage, ChatPrompt, ChatRole, SUTOptions, TextPrompt
-from modelgauge.secret_values import InjectSecret
 from modelgauge.single_turn_prompt_response import PromptWithContext
 from modelgauge.safety_model_response import SafetyModelResponse
 from modelgauge.sut import SUTCompletion
 from modelgauge.utils import flatten_conversation_to_str
 
-ANNOTATOR_UID = "llama_3_70b"
-LLAMA_3_70B_MODEL_PATH = "meta-llama/Llama-3-70b-chat-hf"
-_USER_ROLE = "user"
-_ASSISTANT_ROLE = "assistant"
-_DEFAULT_MAX_CHAT_TOKENS = 4000
+
+class TogetherModelConfig(BaseModel):
+    path: str
+    max_tokens: int = 4000
+    api_key: TogetherApiKey
 
 
-class Llama3_70bChatAnnotator(CompletionAnnotator[SafetyModelResponse]):
-    """Annotator simply uses a prompt with Llama 3 70b to do hazard and safety classification"""
+class PromptEngineeredAnnotatorConfig(BaseModel):
+    name: str
+    # FIXME - in the future, model_config should be a union eg Union[ConfigA, ConfigB]
+    llm_config: TogetherModelConfig
+    labeler_system_prompt: str
+    labeler_user_prompt: str
+    taxonomy: str
+    role_to_measure: str
+    pass
+
+
+class PromptEngineeredTogetherAnnotator(CompletionAnnotator[SafetyModelResponse]):
+    """Annotator using prompt engineering for hazard and safety classification"""
 
     def __init__(
         self,
         uid: str,
-        together_api_key: TogetherApiKey,
+        config: PromptEngineeredAnnotatorConfig,
     ):
         super().__init__(uid)
-        self.model_name = None
-        self.model = TogetherChatSUT(uid, LLAMA_3_70B_MODEL_PATH, together_api_key)
+        self.config = config
+        self.model = TogetherChatSUT(
+            uid, self.config.llm_config.path, self.config.llm_config.api_key
+        )
 
     def translate_request(self, prompt: PromptWithContext, completion: SUTCompletion):
         """Convert the prompt+completion into the native representation for this annotator."""
         system_prompt = ChatMessage(
-            text=LABELER_SYS_PROMPT.format(taxonomy=MLC_TAXONOMY_0_5),
+            text=self.config.labeler_system_prompt.format(
+                taxonomy=self.config.taxonomy
+            ),
             role=ChatRole.system,
         )
 
@@ -65,14 +74,14 @@ class Llama3_70bChatAnnotator(CompletionAnnotator[SafetyModelResponse]):
                 messages=[
                     system_prompt,
                     ChatMessage(
-                        text=LABELER_USER_PROMPT.format(
+                        text=self.config.labeler_user_prompt.format(
                             messages=chat_interactions_to_annotate,
-                            role_to_measure=_ASSISTANT_ROLE,
+                            role_to_measure=self.config.role_to_measure,
                         ),
                         role=ChatRole.user,
                     ),
                 ],
-                options=SUTOptions(max_tokens=_DEFAULT_MAX_CHAT_TOKENS),
+                options=SUTOptions(max_tokens=self.config.llm_config.max_tokens),
             )
         )
 
@@ -103,8 +112,3 @@ class Llama3_70bChatAnnotator(CompletionAnnotator[SafetyModelResponse]):
                 safety_categories=[],
                 is_valid=False,
             )
-
-
-ANNOTATORS.register(
-    Llama3_70bChatAnnotator, ANNOTATOR_UID, InjectSecret(TogetherApiKey)
-)

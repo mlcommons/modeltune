@@ -2,13 +2,11 @@ import json
 
 from modelgauge.suts.together_client import TogetherChatRequest, TogetherChatResponse
 from modelgauge.prompt import ChatMessage, ChatPrompt, ChatRole, TextPrompt
-from modelgauge.annotators.llama_3_70b_chat_annotator import (
-    _ASSISTANT_ROLE,
-    _USER_ROLE,
-    Llama3_70bChatAnnotator,
-    _flatten_conversation_to_str,
-    LLAMA_3_70B_MODEL_PATH,
-    _DEFAULT_MAX_CHAT_TOKENS,
+from modelgauge.annotators.prompt_engineered_annotator import TogetherModelConfig
+from modelgauge.safety_model_constants import ASSISTANT_ROLE, SYSTEM_ROLE, USER_ROLE
+from modelgauge.annotators.prompt_engineered_annotator import (
+    PromptEngineeredTogetherAnnotator,
+    PromptEngineeredAnnotatorConfig,
 )
 from modelgauge.safety_model_prompts import (
     LABELER_SYS_PROMPT,
@@ -22,8 +20,26 @@ from modelgauge.single_turn_prompt_response import PromptWithContext
 from modelgauge.sut import SUTCompletion
 
 
+def _fake_annotator(role_to_measure=ASSISTANT_ROLE):
+    fake_config = PromptEngineeredAnnotatorConfig(
+        name="test_annotator",
+        llm_config=TogetherModelConfig(
+            path="fake/path",
+            api_key=TogetherApiKey("fake_key"),
+        ),
+        labeler_system_prompt="fake prompt",
+        labeler_user_prompt="fake prompt",
+        taxonomy="fake taxonomy",
+        role_to_measure=role_to_measure,
+    )
+
+    fake_annotator = PromptEngineeredTogetherAnnotator("_", fake_config)
+
+    return fake_annotator
+
+
 def test_translate_request_text_prompt():
-    annotator = Llama3_70bChatAnnotator("_", TogetherApiKey("fake_key"))
+    annotator = _fake_annotator()
 
     prompt = PromptWithContext(
         prompt=TextPrompt(text="Hello"),
@@ -34,21 +50,23 @@ def test_translate_request_text_prompt():
     request = annotator.translate_request(prompt, completion)
 
     correct_request = TogetherChatRequest(
-        model=LLAMA_3_70B_MODEL_PATH,
+        model=annotator.config.llm_config.path,
         messages=[
             TogetherChatRequest.Message(
-                role="system",
-                content=LABELER_SYS_PROMPT.format(taxonomy=MLC_TAXONOMY_0_5),
+                role=SYSTEM_ROLE,
+                content=annotator.config.labeler_system_prompt.format(
+                    taxonomy=annotator.config.taxonomy
+                ),
             ),
             TogetherChatRequest.Message(
-                role=_USER_ROLE,
-                content=LABELER_USER_PROMPT.format(
+                role=USER_ROLE,
+                content=annotator.config.labeler_user_prompt.format(
                     messages="User: Hello\n\nAssistant: Hi!",
-                    role_to_measure=_ASSISTANT_ROLE,
+                    role_to_measure=ASSISTANT_ROLE,
                 ),
             ),
         ],
-        max_tokens=_DEFAULT_MAX_CHAT_TOKENS,
+        max_tokens=annotator.config.llm_config.max_tokens,
         n=1,
     )
 
@@ -56,7 +74,7 @@ def test_translate_request_text_prompt():
 
 
 def test_translate_request_chat_prompt():
-    annotator = Llama3_70bChatAnnotator("_", TogetherApiKey("fake_key"))
+    annotator = _fake_annotator()
 
     prompt = PromptWithContext(
         prompt=ChatPrompt(
@@ -72,21 +90,23 @@ def test_translate_request_chat_prompt():
     request = annotator.translate_request(prompt, completion)
 
     correct_request = TogetherChatRequest(
-        model=LLAMA_3_70B_MODEL_PATH,
+        model=annotator.config.llm_config.path,
         messages=[
             TogetherChatRequest.Message(
                 role="system",
-                content=LABELER_SYS_PROMPT.format(taxonomy=MLC_TAXONOMY_0_5),
+                content=annotator.config.labeler_system_prompt.format(
+                    taxonomy=annotator.config.taxonomy
+                ),
             ),
             TogetherChatRequest.Message(
-                role=_USER_ROLE,
-                content=LABELER_USER_PROMPT.format(
+                role=USER_ROLE,
+                content=annotator.config.labeler_user_prompt.format(
                     messages="User: Hello\n\nAssistant: Hi!",
-                    role_to_measure=_ASSISTANT_ROLE,
+                    role_to_measure=ASSISTANT_ROLE,
                 ),
             ),
         ],
-        max_tokens=_DEFAULT_MAX_CHAT_TOKENS,
+        max_tokens=annotator.config.llm_config.max_tokens,
         n=1,
     )
 
@@ -94,7 +114,7 @@ def test_translate_request_chat_prompt():
 
 
 def test_translate_response_well_formatted():
-    annotator = Llama3_70bChatAnnotator("_", TogetherApiKey("fake_key"))
+    annotator = _fake_annotator()
 
     response_json_str = json.dumps(
         {"is_safe": True, "safety_categories": [], "reasoning": "nothing to see here"}
@@ -103,7 +123,7 @@ def test_translate_response_well_formatted():
     response.choices = [
         TogetherChatResponse.Choice(
             message=TogetherChatResponse.Choice.Message(
-                content=response_json_str, role=_USER_ROLE
+                content=response_json_str, role=USER_ROLE
             ),
         )
     ]
@@ -122,14 +142,14 @@ def test_translate_response_well_formatted():
 
 
 def test_translate_response_with_error():
-    annotator = Llama3_70bChatAnnotator("_", TogetherApiKey("fake_key"))
+    annotator = _fake_annotator()
 
     bogus_response = "not a json"
     response = _make_together_base_response()
     response.choices = [
         TogetherChatResponse.Choice(
             message=TogetherChatResponse.Choice.Message(
-                content=bogus_response, role=_USER_ROLE
+                content=bogus_response, role=USER_ROLE
             ),
         )
     ]
@@ -143,19 +163,6 @@ def test_translate_response_with_error():
     )
 
     assert result.model_dump_json() == expected_result.model_dump_json()
-
-
-def test_flatten_conversation_to_str():
-    chat = ChatPrompt(
-        messages=[
-            ChatMessage(role=ChatRole.user, text="Hello"),
-            ChatMessage(role=ChatRole.sut, text="Hi!"),
-        ]
-    )
-
-    result = _flatten_conversation_to_str(chat)
-
-    assert result == "User: Hello\n\nAssistant: Hi!"
 
 
 def _make_together_base_response():
