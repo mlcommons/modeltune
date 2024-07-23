@@ -1,18 +1,18 @@
 import json
 
 from pydantic import BaseModel
-from modelgauge.suts.together_client import (
-    TogetherApiKey,
-    TogetherChatRequest,
-    TogetherChatResponse,
-    TogetherChatSUT,
-)
+
 from modelgauge.annotator import CompletionAnnotator
-from modelgauge.prompt import ChatMessage, ChatPrompt, ChatRole, SUTOptions, TextPrompt
-from modelgauge.single_turn_prompt_response import PromptWithContext
+from modelgauge.prompt import (ChatMessage, ChatPrompt, ChatRole, SUTOptions,
+                               TextPrompt)
 from modelgauge.safety_model_response import SafetyModelResponse
+from modelgauge.safety_model_utils import flatten_conversation_to_str
+from modelgauge.single_turn_prompt_response import PromptWithContext
 from modelgauge.sut import SUTCompletion
-from modelgauge.utils import flatten_conversation_to_str
+from modelgauge.suts.together_client import (TogetherApiKey,
+                                             TogetherChatRequest,
+                                             TogetherChatResponse,
+                                             TogetherChatSUT)
 
 
 class TogetherModelConfig(BaseModel):

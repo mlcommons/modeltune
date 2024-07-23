@@ -10,10 +10,10 @@ from modelgauge.safety_model_prompts import (LABELER_SYS_PROMPT,
                                              MLC_TAXONOMY_0_5)
 from modelgauge.suts.together_client import TogetherApiKey
 
-LLAMA_3_70B_CONFIG = PromptEngineeredAnnotatorConfig(
-    name="llama_3_70b",
+MISTRAL_8x22B_CONFIG = PromptEngineeredAnnotatorConfig(
+    name="mistral_8x22b",
     llm_config=TogetherModelConfig(
-        path="meta-llama/Llama-3-70b-chat-hf",
+        path="mistralai/Mixtral-8x22B-Instruct-v0.1",
         api_key=TogetherApiKey(os.environ.get("TOGETHER_API_KEY")),
     ),
     labeler_system_prompt=LABELER_SYS_PROMPT,
@@ -23,5 +23,5 @@ LLAMA_3_70B_CONFIG = PromptEngineeredAnnotatorConfig(
 )
 
 ANNOTATORS.register(
-    PromptEngineeredTogetherAnnotator, LLAMA_3_70B_CONFIG.name, LLAMA_3_70B_CONFIG
+    PromptEngineeredTogetherAnnotator, MISTRAL_8x22B_CONFIG.name, MISTRAL_8x22B_CONFIG
 )

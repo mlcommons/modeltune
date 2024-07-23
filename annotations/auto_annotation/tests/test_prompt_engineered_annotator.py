@@ -1,23 +1,17 @@
 import json
 
-from modelgauge.suts.together_client import TogetherChatRequest, TogetherChatResponse
-from modelgauge.prompt import ChatMessage, ChatPrompt, ChatRole, TextPrompt
-from modelgauge.annotators.prompt_engineered_annotator import TogetherModelConfig
-from modelgauge.safety_model_constants import ASSISTANT_ROLE, SYSTEM_ROLE, USER_ROLE
 from modelgauge.annotators.prompt_engineered_annotator import (
-    PromptEngineeredTogetherAnnotator,
-    PromptEngineeredAnnotatorConfig,
-)
-from modelgauge.safety_model_prompts import (
-    LABELER_SYS_PROMPT,
-    MLC_TAXONOMY_0_5,
-    LABELER_USER_PROMPT,
-)
-from modelgauge.suts.together_client import TogetherApiKey
-
+    PromptEngineeredAnnotatorConfig, PromptEngineeredTogetherAnnotator,
+    TogetherModelConfig)
+from modelgauge.prompt import ChatMessage, ChatPrompt, ChatRole, TextPrompt
+from modelgauge.safety_model_constants import (ASSISTANT_ROLE, SYSTEM_ROLE,
+                                               USER_ROLE)
 from modelgauge.safety_model_response import SafetyModelResponse
 from modelgauge.single_turn_prompt_response import PromptWithContext
 from modelgauge.sut import SUTCompletion
+from modelgauge.suts.together_client import (TogetherApiKey,
+                                             TogetherChatRequest,
+                                             TogetherChatResponse)
 
 
 def _fake_annotator(role_to_measure=ASSISTANT_ROLE):

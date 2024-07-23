@@ -18,6 +18,7 @@ modelgauge_together = {path = "../../modelgauge/plugins/together", develop = tru
 pytest = "^8.3.1"
 debugpy = "^1.8.2"
 mypy = "^1.11.0"
+isort = "^5.13.2"
 
 
 [build-system]

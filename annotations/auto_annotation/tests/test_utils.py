@@ -1,5 +1,5 @@
 from modelgauge.prompt import ChatMessage, ChatPrompt, ChatRole
-from modelgauge.utils import flatten_conversation_to_str
+from modelgauge.safety_model_utils import flatten_conversation_to_str
 
 
 def test_flatten_conversation_to_str():
