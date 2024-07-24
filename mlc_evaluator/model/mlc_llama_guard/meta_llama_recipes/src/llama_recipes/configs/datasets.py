@@ -3,32 +3,34 @@
 
 from dataclasses import dataclass
 
-    
+
 @dataclass
 class samsum_dataset:
-    dataset: str =  "samsum_dataset"
+    dataset: str = "samsum_dataset"
     train_split: str = "train"
     test_split: str = "validation"
-    
-    
+
+
 @dataclass
 class grammar_dataset:
     dataset: str = "grammar_dataset"
-    train_split: str = "src/llama_recipes/datasets/grammar_dataset/gtrain_10k.csv" 
-    test_split: str = "src/llama_recipes/datasets/grammar_dataset/grammar_validation.csv"
+    train_split: str = "src/llama_recipes/datasets/grammar_dataset/gtrain_10k.csv"
+    test_split: str = (
+        "src/llama_recipes/datasets/grammar_dataset/grammar_validation.csv"
+    )
 
-    
+
 @dataclass
 class alpaca_dataset:
     dataset: str = "alpaca_dataset"
     train_split: str = "train"
     test_split: str = "val"
     data_path: str = "src/llama_recipes/datasets/alpaca_data.json"
-    
-    
+
+
 @dataclass
-class custom_dataset:
-    dataset: str = "custom_dataset"
-    file: str = "recipes/quickstart/finetuning/datasets/custom_dataset.py"
+class aegis_dataset:
+    dataset: str = "aegis_dataset"
     train_split: str = "train"
-    test_split: str = "validation"
+    test_split: str = "val"
+    data_path = "mlc_evaluator/data/llama_guard_training_data/CM_Extracted_Annotations_July_train_llama_aegis_training_data_20240724-195317.json"
