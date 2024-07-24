@@ -1,0 +1,22 @@
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Distribution / packaging
+
+# C extensions
+*.so
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+
+.DS_Store
+
+artifacts/
