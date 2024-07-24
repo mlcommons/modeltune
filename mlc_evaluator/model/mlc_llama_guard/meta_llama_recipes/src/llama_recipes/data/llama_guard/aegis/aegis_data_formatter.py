@@ -4,9 +4,9 @@ import argparse
 import json
 import os
 
-import pathlib
-#pathlib.Path(__file__).parent.resolve()
-pathlib.Path("/modeltune/mlc_evaluator") #FIXME change to relative
+# import pathlib
+# pathlib.Path(__file__).parent.resolve()
+# pathlib.Path("/modeltune/mlc_evaluator")  # FIXME change to relative
 
 from pathlib import Path
 import time
@@ -154,17 +154,30 @@ class AegisDataFormatter(MLCDatasetsFormatterBase):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Create training examples for Aegis dataset.')
-    parser.add_argument('--file_path', required=True, type=str, help='Path to Aegis dataset.')
-    parser.add_argument('--label_column', required=True, type=str, help='Column name for labels/annotations.')
-    parser.add_argument('--text_column', required=True, type=str, help='Column name for text/conversation.')
+    parser = argparse.ArgumentParser(
+        description="Create training examples for Aegis dataset."
+    )
+    parser.add_argument(
+        "--file_path", required=True, type=str, help="Path to Aegis dataset."
+    )
+    parser.add_argument(
+        "--label_column",
+        required=True,
+        type=str,
+        help="Column name for labels/annotations.",
+    )
+    parser.add_argument(
+        "--text_column",
+        required=True,
+        type=str,
+        help="Column name for text/conversation.",
+    )
     args = parser.parse_args()
-    
 
     assert args.file_path, "invalid file path"
     aegis_formatter = AegisDataFormatter(args.file_path)
     assert aegis_formatter, "Invalid Dataset formatter object"
-    
+
     aegis_formatter.set_annotation_column_name(args.label_column)
     aegis_formatter.set_conversation_column_name(args.text_column)
     training_examples, training_examples_serialized = (
@@ -183,7 +196,8 @@ if __name__ == "__main__":
     # File to write Llama Guard training ready data
     timestr = time.strftime("%Y%m%d-%H%M%S")
     output_file_name = os.path.join(
-        "./data/llama_guard_training_data", f"{base_name}_aegis_training_data_{timestr}.json"
+        "./data/llama_guard_training_data",
+        f"{base_name}_aegis_training_data_{timestr}.json",
     )
     formatted_ex_file = open(output_file_name, "w")
 
