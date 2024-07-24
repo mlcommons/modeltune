@@ -196,6 +196,7 @@ def main(**kwargs):
         elif torch.cuda.is_available():
             model.to("cuda")
 
+    #print(train_config)
     dataset_config = generate_dataset_config(train_config, kwargs)
 
      # Load and preprocess the dataset for training and validation
