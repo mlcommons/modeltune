@@ -3,7 +3,6 @@
 
 from dataclasses import dataclass
 
-
 @dataclass
 class samsum_dataset:
     dataset: str = "samsum_dataset"
@@ -33,4 +32,4 @@ class aegis_dataset:
     dataset: str = "aegis_dataset"
     train_split: str = "train"
     test_split: str = "val"
-    data_path = "mlc_evaluator/data/llama_guard_training_data/CM_Extracted_Annotations_July_train_llama_aegis_training_data_20240724-195317.json"
+    data_path = "data/llama_guard_training_data/aegis_small_july_0727_aegis_training_data_20240724-231749.json"
