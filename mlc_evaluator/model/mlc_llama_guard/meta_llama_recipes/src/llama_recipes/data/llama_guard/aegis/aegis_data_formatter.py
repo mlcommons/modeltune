@@ -3,8 +3,14 @@
 import argparse
 import json
 import os
+
+import pathlib
+#pathlib.Path(__file__).parent.resolve()
+pathlib.Path("/modeltune/mlc_evaluator") #FIXME change to relative
+
 from pathlib import Path
 import time
+
 
 from model.mlc_llama_guard.meta_llama_recipes.src.llama_recipes.data.llama_guard.aegis.aegis_data_format import (
     AEGIS_TAXONOMY,
@@ -148,19 +154,21 @@ class AegisDataFormatter(MLCDatasetsFormatterBase):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description='Create training examples for Aegis dataset.')
-    # parser.add_argument('--file_path', required=True, type=str, help='Path to Aegis dataset.')
-    # parser.add_argument('--label_column', required=True, type=str, help='C.')
-    # args = parser.parse_args()
-    file_path = "model/mlc_llama_guard/meta_llama_recipes/src/llama_recipes/data/llama_guard/aegis/CM_Extracted_Annotations_July_train_llama.json"
+    parser = argparse.ArgumentParser(description='Create training examples for Aegis dataset.')
+    parser.add_argument('--file_path', required=True, type=str, help='Path to Aegis dataset.')
+    parser.add_argument('--label_column', required=True, type=str, help='Column name for labels/annotations.')
+    parser.add_argument('--text_column', required=True, type=str, help='Column name for text/conversation.')
+    args = parser.parse_args()
+    
 
-    aegis_formatter = AegisDataFormatter(file_path)
+    assert args.file_path, "invalid file path"
+    aegis_formatter = AegisDataFormatter(args.file_path)
     assert aegis_formatter, "Invalid Dataset formatter object"
-    aegis_formatter.set_annotation_column_name("labels")
-    aegis_formatter.set_conversation_column_name("text")
-    #aegis_formatter
+    
+    aegis_formatter.set_annotation_column_name(args.label_column)
+    aegis_formatter.set_conversation_column_name(args.text_column)
     training_examples, training_examples_serialized = (
-        aegis_formatter.get_training_examples(file_path)
+        aegis_formatter.get_training_examples(args.file_path)
     )
 
     assert len(training_examples) != 0, "No training examples to format"
@@ -169,13 +177,13 @@ if __name__ == "__main__":
         training_examples, formatter_configs
     )
 
-    base_filename = os.path.basename(file_path)
+    base_filename = os.path.basename(args.file_path)
     base_name, ext = base_filename.split(".json")
 
     # File to write Llama Guard training ready data
     timestr = time.strftime("%Y%m%d-%H%M%S")
     output_file_name = os.path.join(
-        "", f"{base_name}_aegis_training_data_{timestr}.json"
+        "./data/llama_guard_training_data", f"{base_name}_aegis_training_data_{timestr}.json"
     )
     formatted_ex_file = open(output_file_name, "w")
 
