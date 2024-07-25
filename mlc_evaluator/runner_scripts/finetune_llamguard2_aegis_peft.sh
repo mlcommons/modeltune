@@ -3,9 +3,9 @@
 # Define variables
 NNODES=1
 NPROC_PER_NODE=8
-MODEL_NAME="/home/shaona/.cache/huggingface/hub/models--meta-llama--Meta-Llama-Guard-2-8B/snapshots/7d257f3c1a0ec6ed99b2cb715027149dfb9784ef"
+MODEL_NAME="meta-llama/Meta-Llama-Guard-2-8B"
 DATASET="aegis_dataset"
-OUTPUT_DIR="/home/shaona/trained_models_test"
+OUTPUT_DIR="trained_model_checkpoints"
 PATH_TO_FINETUNE="model/mlc_llama_guard/meta_llama_recipes/recipes/quickstart/finetuning/"
 
 
