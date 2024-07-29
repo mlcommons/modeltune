@@ -29,7 +29,17 @@ class alpaca_dataset:
 
 @dataclass
 class aegis_dataset:
+    """ Trainind dataset that uses subset of aegis data"""
     dataset: str = "aegis_dataset"
     train_split: str = "train"
     test_split: str = "val"
     data_path = "data/llama_guard_training_data/aegis_small_july_0727_aegis_training_data_20240724-231749.json"
+
+
+@dataclass
+class mlc_dataset:
+    """ Trainind dataset that uses mlc V0.5 ~40k AI labelled dataset"""
+    dataset: str = "mlc_dataset"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path = "data/llama_guard_training_data/32k_merged_mlc_v0_5_teacher_annotations_0724_mlc_training_data_20240726-030542.json"

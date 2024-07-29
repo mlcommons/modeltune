@@ -4,10 +4,6 @@ import argparse
 import json
 import os
 
-# import pathlib
-# pathlib.Path(__file__).parent.resolve()
-# pathlib.Path("/modeltune/mlc_evaluator")  # FIXME change to relative
-
 from pathlib import Path
 import time
 
