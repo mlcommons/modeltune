@@ -19,7 +19,6 @@ class AgentType(Enum):
     AGENT: this role is for the last assistant response
 
     """
-
     AGENT = "agent"
     USER = "user"
 
@@ -162,7 +161,7 @@ llama_guard_prompt_configs = LlamaGuardPromptConfigs(
     
 <BEGIN UNSAFE CONTENT CATEGORIES>
 
-{MLC_0_5_GUIDELINES}
+{guidelines}
 
 <END UNSAFE CONTENT CATEGORIES>
 
