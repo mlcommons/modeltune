@@ -8,8 +8,9 @@ This command line tool depends on modelgauge and can help with the following
 1. TODO initializing modelgauge as a submodule after cloning
 1. cd ../teachers
 1. Run `poetry install` from inside the `/teachers` directory
-1. Modify `teachers/config/secrets.toml`. Add together api secret (if using together api annotators)
-    1. open config/secrets.toml, under [together] api-key add your together api key
+1. ~~Modify `teachers/config/secrets.toml`. Add together api secret (if using together api annotators)~~
+    1. ~~open config/secrets.toml, under [together] api-key add your together api key~~
+1. Create env var locally in terminal for together API. `export TOGETHER_API_KEY=`
 1. Run `poetry run modelgauge run-annotators -a <NAME_OF_ANNOTATOR> <CSV_FILE>`
     1. `<NAME_OF_ANNOTATOR>`: Current annotators supported: `llama_3_70b`, `mistral_8x22b`, `llama_guard_2`
     1. `<CSV_FILE>`: csv file must adhere to a certain format (TODO provide reference).
