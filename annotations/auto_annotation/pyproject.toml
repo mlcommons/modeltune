@@ -19,6 +19,12 @@ pytest = "^8.3.1"
 debugpy = "^1.8.2"
 mypy = "^1.11.0"
 isort = "^5.13.2"
+pre-commit = "^3.8.0"
+
+
+[tool.black]
+target-version = ["py310"]
+include = '\.pyi?$'
 
 
 [build-system]
