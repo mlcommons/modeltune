@@ -15,5 +15,5 @@ This command line tool depends on modelgauge and can help with the following
     1. `<NAME_OF_ANNOTATOR>`: Current annotators supported: `llama_3_70b`, `mistral_8x22b`, `llama_guard_2`
     1. `<CSV_FILE>`: csv file must adhere to a certain format (TODO provide reference).
         1. Requires csv file has the following columns: `UID`, `Prompt`, `Response`, `SUT`
-        1. Currently (as of July 20, 2024) the requirements are indicated in the `annotation_pipeline.py::CsvAnnotatorInput` class definition. 
-    
+        1. Currently (as of July 20, 2024) the requirements are indicated in the `annotation_pipeline.py::CsvAnnotatorInput` class definition.
+
