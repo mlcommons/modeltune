@@ -20,7 +20,3 @@ This command line tool depends on modelgauge and can help with the following
 1. TODO initializing modelgauge as a submodule after cloning
 1. cd `..annotations/auto_annotation` and run `poetry install`
 1. Run `poetry run pre-commit install` to set up pre-commit hooks
-
-
-
-
