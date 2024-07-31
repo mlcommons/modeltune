@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 
 SIZE_OF_INST_TOKEN = 7
 IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
+INST_TOKEN = "[/INST]"
 
 
 class MLCDataset(Dataset):
@@ -31,10 +32,11 @@ class MLCDataset(Dataset):
         return len(self.annotated_data)
 
     def __getitem__(self, index):
+        """Yielding data items."""
         full_prompt = list(self.annotated_data.items())[index][1]
 
         # Prompt length
-        index_of_instr_enc = full_prompt.find("[/INST]")
+        index_of_instr_enc = full_prompt.find(INST_TOKEN)
         prompt = full_prompt[: index_of_instr_enc + SIZE_OF_INST_TOKEN]  # Size of /INST
 
         output = full_prompt[index_of_instr_enc + SIZE_OF_INST_TOKEN : -1]

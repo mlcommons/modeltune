@@ -361,7 +361,7 @@ if __name__ == "__main__":
         "mlc",
     ], "Unsupported variant type"
 
-    if "HUGGINGFACE_TOKEN" is environ:
+    if "HUGGINGFACE_TOKEN" is in environ:
         lg_access_token = environ["HUGGINGFACE_TOKEN"]
     else:
         raise ValueError("Invalid HF access token")
