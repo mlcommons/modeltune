@@ -44,6 +44,9 @@ jobs:
     - name: Lint formatting
       run: poetry run black --check .
 
+    - name: Lint imports
+      run: poetry run isort --check .
+
     - name: Validate Poetry state
       run: poetry check
 
