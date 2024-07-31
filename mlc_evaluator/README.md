@@ -33,25 +33,36 @@ MLC Auto Cluster 8xH100s
 4. export PYTHONPATH=. to your enviroment (preferably add to ~/.bashrc) #TODO  Add setup.py 
 
 ## Training Data Creation
-The dataset has to be in a specific format (TODO for commiting data preprocessing code)
+The dataset has to be in a specific format. Once you have the dataset in the specific format, you can create the training compatible dataset using the command below.
+
 ```bash
-python model/mlc_llama_guard/meta_llama_recipes/src/llama_recipes/data/llama_guard/aegis/aegis_data_formatter.py  --file_path FILE_PATH --label_column LABEL_COLUMN --text_column TEXT_COLUMN
+python model/mlc_llama_guard/meta_llama_recipes/src/llama_recipes/data/llama_guard/mlc_data/mlc_data_formatter.py  --file_path /home/shaona/modeltune/mlc_evaluator/data/source_datasets/source_dataset.json    --label_column <labels_column_name> --text_column <text_column_name>
 ```
-Try on toy example dataset:
-```
-python model/mlc_llama_guard/meta_llama_recipes/src/llama_recipes/data/llama_guard/aegis/aegis_data_formatter.py  --file_path data/source_datasets/aegis_small_july_0727.json    --label_column labels --text_column text
-```
+
+To try running on a MLC dataset, you will need access to the dataset first to download and run. 
 
 ## Launch fine-tuning
 Pre-requisite : Obtain access to meta-llama/Meta-Llama-Guard-2-8B  on Hugging Face as its a gated model.
 
+From inside 
+`modeltune/mlc_evaluator/` after changing permissions of the script, run: 
 
-The training dataset created above can be used for training. Additionally, a pre-created toy training set is available in mlc_evaluator/data/source_datasets/ if you directly want to launch training. From inside 
-modeltune/mlc_evaluator/ after changing permissions: 
 ```bash
-./runner_scripts/finetune_llamguard2_aegis_peft.sh 
+./runner_scripts/finetune_llamguard2_mlc_v0_5_peft_hyperparam_1.sh 
 ```
 
+## Evaluate the fine-tuned model 
+Pre-requisite : Obtain access to the MLC evaluation dataset first. 
 
+From the root directory `modeltune/mlc_evaluator/`, run
+```bash
+ python inference/infer.py --dataset_name mlc-1320  --variant_type mlc
+ ```
+
+## For running tests, run 
+
+```bash
+python -m unittest model/mlc_llama_guard/meta_llama_recipes/src/llama_recipes/data/llama_guard/mlc_data/test_mlc_data_formatter.py
+``` 
 
 
