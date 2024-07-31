@@ -32,6 +32,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'poetry'
 
+    - name: Init submodule
+      run: git submodule init
+
+    - name: Update submodule
+      run: git submodule update
+
     - name: Install with plugins
       run: poetry install --no-interaction
 
