@@ -2,12 +2,16 @@ import os
 
 from modelgauge.annotator_registry import ANNOTATORS
 from modelgauge.annotators.prompt_engineered_annotator import (
-    PromptEngineeredAnnotatorConfig, PromptEngineeredAnnotator,
-    TogetherModelConfig)
+    PromptEngineeredAnnotator,
+    PromptEngineeredAnnotatorConfig,
+    TogetherModelConfig,
+)
 from modelgauge.safety_model_constants import ASSISTANT_ROLE
-from modelgauge.safety_model_prompts import (LABELER_SYS_PROMPT,
-                                             LABELER_USER_PROMPT,
-                                             MLC_TAXONOMY_0_5)
+from modelgauge.safety_model_prompts import (
+    LABELER_SYS_PROMPT,
+    LABELER_USER_PROMPT,
+    MLC_TAXONOMY_0_5,
+)
 from modelgauge.suts.together_client import TogetherApiKey
 
 LLAMA_3_70B_CONFIG = PromptEngineeredAnnotatorConfig(
