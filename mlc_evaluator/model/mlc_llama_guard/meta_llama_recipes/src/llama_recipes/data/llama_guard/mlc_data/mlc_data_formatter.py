@@ -63,6 +63,7 @@ class MLCDataFormatter(MLCDatasetsFormatterBase):
             # Format expected by Llama Guard for prompt and response
             response = "N/A"
             agent_type = ""
+            assert isinstance(json_data, list), "Expecting a list"
             for i, sample in enumerate(json_data):
                 assert self.labels_column_name, "Invalid labels column name provided"
                 annotations = sample[self.labels_column_name]
@@ -142,6 +143,14 @@ class MLCDataFormatter(MLCDatasetsFormatterBase):
                 }
         return training_examples, write_to_file
 
+    def get_formatted_training_examples(self, training_examples):
+        """Method to format the training examples for finetuning"""
+         # Call the create_formatted_finetuning_examples function
+        formatted_examples = create_formatted_finetuning_examples(
+        training_examples, formatter_configs
+        )
+        return formatted_examples
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -176,9 +185,10 @@ if __name__ == "__main__":
 
     assert len(training_examples) != 0, "No training examples to format"
     # Call the create_formatted_finetuning_examples function
-    formatted_examples = create_formatted_finetuning_examples(
-        training_examples, formatter_configs
-    )
+    # formatted_examples = create_formatted_finetuning_examples(
+    #     training_examples, formatter_configs
+    # )
+    formatted_examples = mlc_formatter.get_formatted_training_examples(training_examples)
 
     base_filename = os.path.basename(args.file_path)
     base_name, ext = base_filename.split(".json")

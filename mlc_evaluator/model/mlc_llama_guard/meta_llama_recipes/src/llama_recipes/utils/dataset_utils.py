@@ -12,7 +12,7 @@ from llama_recipes.datasets import (
     get_alpaca_dataset,
     get_samsum_dataset,
     get_aegis_dataset,
-    get_mlc_dataset
+    get_mlc_dataset,
 )
 
 
@@ -31,6 +31,7 @@ def load_module_from_py_file(py_file: str) -> object:
 
 
 def get_custom_dataset(dataset_config, tokenizer, split: str):
+    """Retrieve the custom dataset."""
     if ":" in dataset_config.file:
         module_path, func_name = dataset_config.file.split(":")
     else:
@@ -41,13 +42,17 @@ def get_custom_dataset(dataset_config, tokenizer, split: str):
 
     module_path = Path(module_path)
     if not module_path.is_file():
-        raise FileNotFoundError(f"Dataset py file {module_path.as_posix()} does not exist or is not a file.")
+        raise FileNotFoundError(
+            f"Dataset py file {module_path.as_posix()} does not exist or is not a file."
+        )
 
     module = load_module_from_py_file(module_path.as_posix())
     try:
         return getattr(module, func_name)(dataset_config, tokenizer, split)
     except AttributeError as e:
-        print(f"It seems like the given method name ({func_name}) is not present in the dataset .py file ({module_path.as_posix()}).")
+        print(
+            f"It seems like the given method name ({func_name}) is not present in the dataset .py file ({module_path.as_posix()})."
+        )
         raise e
 
 
@@ -55,14 +60,15 @@ DATASET_PREPROC = {
     "alpaca_dataset": partial(get_alpaca_dataset),
     "grammar_dataset": get_grammar_dataset,
     "samsum_dataset": get_samsum_dataset,
-    "aegis_dataset": get_aegis_dataset,  
-    "mlc_dataset": get_mlc_dataset
+    "aegis_dataset": get_aegis_dataset,
+    "mlc_dataset": get_mlc_dataset,
 }
 
 
 def get_preprocessed_dataset(
     tokenizer, dataset_config, split: str = "train"
 ) -> torch.utils.data.Dataset:
+    """Get the preprocessed dataset."""
     if not dataset_config.dataset in DATASET_PREPROC:
         raise NotImplementedError(f"{dataset_config.dataset} is not (yet) implemented")
 
