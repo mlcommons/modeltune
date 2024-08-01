@@ -60,9 +60,10 @@ From the root directory `modeltune/mlc_evaluator/`, run
  ```
 
 ## For running tests, run 
+From the root directory `modeltune/mlc_evaluator/`, run
 
 ```bash
-python -m unittest model/mlc_llama_guard/meta_llama_recipes/src/llama_recipes/data/llama_guard/mlc_data/test_mlc_data_formatter.py
+python -m unittest model/mlc_llama_guard/meta_llama_recipes/src/tests/test_mlc_data_formatter.py
 ``` 
 
 
